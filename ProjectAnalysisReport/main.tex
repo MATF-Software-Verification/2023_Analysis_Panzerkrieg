@@ -148,63 +148,65 @@ Celokupan izlaz pozivanja alata se može naći u okviru repozitorijuma za analiz
 \label{fig: cppcheck-0}
 \end{figure}
 
-\subsection{GCov}
+\subsection{Memcheck}
 
-GCov je alat za analizu pokrivenosti izvornog koda i alat za profilisanje izraz-po-izraz. Gcov generiše tačne brojeve koliko puta je svaki izraz u programu izvršen. Gcov dolazi kao standardni uslužni program sa GNU Compiler Collection (GCC) paketom.
+Valgrind Memcheck je alat za otkrivanje problema sa korišćenjem memorije kao što je curenje memorije, nevažeći pristup memoriji, nepravilno oslobađanje memorije ili referenciranje nedefinisanih vrednosti.
 
-Primena alata GCov je urađena iz sledećih koraka.
-Prvo su u \textit{Widgetci.pro} fajlu dodata dva flega:
+Koristi se za detekciju navedenih problema koji su karakteristični za programe pisane u C i C++ programskim jezicima.
 
-\begin{itemsize}
-    \item \texttt{QMAKE\_CXXFLAGS += --coverage}
-    \item \texttt{QMAKE\_LFLAGS += --coverage}
-\end{itemsize}
+Da bismo pokrenuli valgrind memcheck alat potrebno je kreirati izvršni fajl. Izvšrni fajl će biti kreiran kroz build fazu projekta u QtCreator-u, nakon čega je potrebno pozicionirati se u okviru build foldera gde se nalazi izvršni fajl.
 
-Izgradnja projekta sa novim flagovima je generisala naredne fajlove, među kojima su i dodatno generisani fajlovi koji imaju ekstenziju '.gcno' i '.gcda'. Svi fajlovi se mogu videti na slici 
-\ref{fig: GCov-00}
+Nakon pozicioniranja vrši se pozivanje sledeće komande:
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.45]{GCov-00.png}
-\end{center}
-\caption{Generisani fajlovi}
-\label{fig: GCov-00}
-\end{figure}
+\textbf{valgrind --tool=memcheck ./Widgetci}
 
-Zatim je pokrenuta naredba koja kreira traženi izveštaj u datoteci \textit{report.info}, a rezultat naredbe možemo videti na sledećoj slici \ref{fig: GCov-01}
+Preko opcije \textbf{--tool=memcheck} se bira alat koji se pokreće (memcheck je podrazumevana vrednost), a \textbf{./Widgetci} je izvršni fajl.
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.45]{GCov-01.png}
-\end{center}
-\caption{rezultat poziva lcov naredbe}
-\label{fig: GCov-01}
-\end{figure}
+Dodatne opcije koje su korišćene su:
 
-Komandom \textbf{genhtml -o report report.info} dobijamo html izveštaj preko podataka iz \textit{report.info} datoteke, a kompletni izlazi prethodne dve komande se mogu naći u okviru repozitorijuma za analizu datog projekta, u okviru foldera GCov.
+\textbf{--track-origins=yes}
 
-U folderu report unutar build foldera se nalazi ceo izveštaj, a html verziju izveštaja možemo videti otvaranjem index.html fajla i ona izgleda kao na slici \ref{fig: GCov-02} ispod.
+\textbf{--show-leak-kinds=all}
+
+\textbf{--leak-check=full}
+
+\textbf{--log-file=../../../../memcheck/valgrind\_memcheck\_output.txt}
+
+Rezultujući fajl \textbf{valgrind\_memcheck\_output.txt} se nalazi u okviru projekta u folderu memcheck.
+
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[scale=0.23]{GCov-02.png}
+\includegraphics[scale=0.45]{memcheck_01.png}
 \end{center}
-\caption{html verzija izveštaja pokrivenosti koda}
-\label{fig: GCov-02}
+\caption{Deo rezultata memcheck alata - heap summary}
+\label{fig: memcheck-0}
 \end{figure}
 
-Detaljniji prikaz pokrivenosti koda nad fajlovima u okviru projekta možemo videti klikom na neki od ponuđenih putanja. Klikom na folder i podfolder \textit{widgetci}, otvara se analiza pokrivenosti koda izlistanih fajlova koji se mogu videti na slici \ref{fig: GCov-03} ispod.
+Na osnovu dela izlaza na slici \ref{fig: memcheck-0} možemo videti da nema curenja memorije za heap blokove memorije. 
+
+
+U izlaznom fajlu se nalazi veliki broj nevalidnih čitanja koji su zajednički za macOS biblioteku dyld, čiji primer se može videti na slici \ref{fig: memcheck-1}.
 
 \begin{figure}[h!]
 \begin{center}
-\includegraphics[scale=0.23]{GCov-03.png}
+\includegraphics[scale=0.45]{memcheck_02.png}
 \end{center}
-\caption{detaljniji prikaz izveštaja pokrivenosti koda}
-\label{fig: GCov-03}
+\caption{Deo rezultata memcheck alata - invalid read}
+\label{fig: memcheck-1}
 \end{figure}
 
-GCov alat je otkrio fajlove čija je pokrivenost veoma mala, gde na primer imamo fajlove wqmlsystem.cpp koji ima pokrivenost 21.2\% i wqmlsystem.h sa pokrivenošću 0.0\%.
+Pored toga može se videti i problem sa \textbf{Conditional jump or move depends on uninitialised value(s)} koja ukazuje na korišćenje neinicijalizovanih vrednosti, primer se može videti na slici \ref{fig: memcheck-2}.
 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.45]{memcheck_03.png}
+\end{center}
+\caption{Deo rezultata memcheck alata - Conditional jump}
+\label{fig: memcheck-2}
+\end{figure}
+
+\newpage
 \subsection{QML Profiler}
 QML Profiler je alat koji omogućava da se dobiju neophodne dijagnostičke informacije, omogućujuću da se analizira kod aplikacije kako bi se otkrili problemi sa performansama. Primer problema sa performansama predstavljaju previše JavaScript-a u određenim frejmovima, C++ funkcija koje traju predugo ili troše previše memorije.
 QML Profiler predstalvja deo i Qt Creator-a i Qt Design Studio-a.
