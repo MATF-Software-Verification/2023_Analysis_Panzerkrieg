@@ -14,11 +14,11 @@ Primena alata će biti izvršena na master grani, nad komitom čiji je hash code
 # Spisak korišćenih alata:
   1. Clang-tidy i Clazy
   2. Cppcheck
-  3. GCov
+  3. Memcheck
   4. QML-profiler
 
 
 # Spisak pronađenih bagova:
   1. Clang-tidy i Clazy su kreirali upozorenje da postoji neinicijalizovano polje na kraju poziva konstruktora, detaljnije objašnjenje se može pronaći u fajlu output.txt u okviru foldera clang_tidy_clazy.
   2. Cppcheck alat je otkrio grešku u fajlu widgetci/wqml- system.cpp na liniji 78 i predstavlja pronadenu funkciju koja je non-void tipa, a ipak ne sadrži povratnu vrednost.
-  3. GCov alat je otkrio fajlove čija je pokrivenost veoma mala, gde na primer imamo fajlove wqmlsystem.cpp koji ima pokrivenost 21.2% i wqmlsystem.h sa pokrivenošću 0.0%.
+  3. Memcheck alat je otkrio probleme pri čitanju memorije, u izveštaju se mogu videti primeri, a ceo izlaz alata memcheck se nalazi u okviru foldera memcheck.
